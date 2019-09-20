@@ -101,9 +101,10 @@ def logout():
 
     # Invalidate cookies with null values and zeroed max_age
     flash('You have been signed out.')
+    expired = datetime.datetime.now() - datetime.timedelta(hours=1)
     res = make_response(redirect(url_for('auth.login')))
-    res.set_cookie('user', '', max_age=0)
-    res.set_cookie('sesh', '', max_age=0)
+    res.set_cookie('user', '', max_age=0, expires=expired, domain='cloud-sec-2019-02.appspot.com', secure=True)
+    res.set_cookie('sesh', '', max_age=0, expires=expired, domain='cloud-sec-2019-02.appspot.com', secure=True)
     return res
 
 """Handles password stretching for storage.  hash is used for password

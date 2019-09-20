@@ -23,12 +23,13 @@ def login_required(func):
             for val in list(q):
                 if val['Session_ID']==sesh_id:
                     return func(*args, **kwargs)
-                else:
-                    flash('Session Error: Unmatched user session')
-                    return redirect(url_for('auth.login'))
+                #else:
         else:
             flash("Please log in")
             return redirect(url_for('auth.login'))
+
+        flash('Session Error: Unmatched user session')
+        return redirect(url_for('auth.login'))
 
     return wrapper
 

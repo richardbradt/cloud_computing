@@ -3,7 +3,7 @@ runtime: python37
 handlers:
   - url: /static
     secure: always
-    static_dir: static
+    static_dir: events/static
 
   - url: /.*
     secure: always
