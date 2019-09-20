@@ -152,4 +152,4 @@ def migrate_data(u_id):
                 'Date': val['Date']
             })
             DS.put(ent)
-            #DS.delete(val.key)   #Delete event under old key
+            DS.delete(val.key)   #Delete event under old key
