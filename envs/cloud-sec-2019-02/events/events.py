@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, make_response, redirect, url_for, flash
 from google.cloud import datastore
 from functools import wraps
 
@@ -8,21 +8,23 @@ DS = datastore.Client()
 EVENT = 'Event'
 key_dict = {}
 
+"""Decorator used to wrap all functions that require user login."""
 def login_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        user_id = session.get('user_id')
-        print(user_id)
+        user_id = request.cookies.get('user')
+        sesh_id = request.cookies.get('sesh')
+
         if user_id:
-            # Check user_id in Datastore
-            # check session expiration?
+            # Check user_id and session ID in Datastore
             q_key = DS.key('Users', user_id)
-            q = DS.query(kind='Users', ancestor=q_key)
-            for val in list(q.fetch()):
-                if val['Username']==user_id:
+            q = DS.query(kind='Session', ancestor=q_key).fetch()
+
+            for val in list(q):
+                if val['Session_ID']==sesh_id:
                     return func(*args, **kwargs)
                 else:
-                    flash("Session Error: Unmatched User")
+                    flash('Session Error: Unmatched user session')
                     return redirect(url_for('auth.login'))
         else:
             flash("Please log in")
@@ -34,7 +36,8 @@ def login_required(func):
 @events.route('/')
 @login_required
 def root():
-    user = DS.query(kind='Users', ancestor=DS.key('Users', session.get('user_id')))
+    user_id = request.cookies.get('user')
+    user = DS.query(kind='Users', ancestor=DS.key('Users', user_id))
     for u in list(user.fetch()):
         f_name = u['First Name']
 
@@ -47,7 +50,7 @@ Creates and Event JSON consisting of Name, Date, and ID."""
 @login_required
 def send_events_to_jscript():
     # Queary database for events and create event list.
-    u_id = session.get('user_id')
+    u_id = request.cookies.get('user')
     p_key = DS.key('Users', u_id)
     QUERY = DS.query(kind=EVENT, ancestor=p_key)
     entity_list = []
@@ -82,7 +85,7 @@ JSON from AJAX call. Returns new event."""
 @events.route('/event', methods=['POST'])
 @login_required
 def add_event():
-    u_id = session.get('user_id')
+    u_id = request.cookies.get('user')
     p_key = DS.key('Users', u_id)
     # Get JSON from AJAX call
     new_json = request.get_json()
@@ -90,7 +93,7 @@ def add_event():
     entity = datastore.Entity(key=DS.key(EVENT, parent=p_key))
     entity.update({'Name': new_json['Name'], 'Date': new_json['Date']})
     DS.put(entity)
-    return new_json#redirect(url_for('events.root'))
+    return new_json
 
 """Handles POST request with /delete URL.  Deletes events from database.
 Requests JSON from AJAX call.  Uses EventID to find corresponding key in the
@@ -98,7 +101,7 @@ key dictionary.  Returns events JSON."""
 @events.route('/delete', methods=['POST'])
 @login_required
 def del_event():
-    u_id = session.get('user_id')
+    u_id = request.cookies.get('user')
     p_key = DS.key('Users', u_id)
     QUERY = DS.query(kind=EVENT, ancestor=p_key)
     # Get JSON from AJAX call
@@ -112,4 +115,4 @@ def del_event():
             break
         else:
             continue
-    return send_events_to_jscript()#redirect(url_for('events.root'))
+    return send_events_to_jscript()

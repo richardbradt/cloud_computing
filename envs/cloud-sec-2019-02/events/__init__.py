@@ -1,10 +1,11 @@
 """ Create app and initialize blueprints """
 from flask import Flask, redirect, url_for
+import os, datetime
 
 def create_app():
     app = Flask(__name__)
 
-    app.config['SECRET_KEY'] = 'key'
+    app.config['SECRET_KEY'] = os.urandom(16)
 
     # blueprint for events routes
     from .events import events as events_blueprint

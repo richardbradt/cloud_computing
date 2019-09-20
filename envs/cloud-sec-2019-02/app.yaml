@@ -2,7 +2,9 @@ runtime: python37
 
 handlers:
   - url: /static
+    secure: always
     static_dir: static
 
   - url: /.*
+    secure: always
     script: auto
