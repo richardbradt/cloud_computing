@@ -1,0 +1,22 @@
+
+{% extends "index.html" %}
+
+{% block content %}
+    <h1>LOGIN PAGE</h1>
+    <div class="container" id="formDiv">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div>
+        {{ messages[0] }}
+      </div>
+    {% endif %}
+    {% endwith %}
+    <form class="form" id="login" method="POST" action="/login">
+      <p>Username: <input type="text" name="user_id"></p>
+      <p>Password: <input type="password" name="pwd"></p>
+      <p><button>Login</button></p>
+      <p><a id='google' href='{{base_uri}}?client_id={{client_id}}&response_type=code&scope=openid%20email%20profile&redirect_uri={{redirect_uri}}&state={{state}}&nonce={{nonce}}'></a></p>
+      <p>New User? <a href="{{url_for('auth.signup')}}" target="_self">Sign up</a></p>
+    </form>
+    </div>
+{% endblock %}

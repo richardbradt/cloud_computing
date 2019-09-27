@@ -1,0 +1,23 @@
+.mainDiv {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1000px;
+  float: none;
+  font-family: "helvetica", sans-serif;
+  text-align: center;
+}
+.container {
+  text-align: center;
+}
+.container table {
+  margin: 0 auto;
+}
+#event_div {
+  padding: 10px;
+}
+#clock_div {
+  padding: 10px;
+}
+#clock_table td {
+  padding: 1.24999992px;
+}
