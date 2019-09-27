@@ -41,7 +41,7 @@ def login():
         entity = DS.query(kind='Users', ancestor=key).fetch()
         for ent in list(entity):
             # hash pwd and compare to Users['password']
-            if ent['Username'] == u_id and ent['Password'] == pwd_stretch(password, ent['Password']):
+            if ent['username'] == u_id and ent['password'] == pwd_stretch(password, ent['password']):
                 return createSession(u_id)
             else:
                 flash("Username or password is incorrect. Please try again")
@@ -109,21 +109,25 @@ def logout():
     # Delete session ID from datastore
     user = request.cookies.get('user')
     sesh = request.cookies.get('sesh')
-    q = DS.query(kind='Sessions', ancestor=DS.key('Sessions', sesh))
-    for x in list(q.fetch()):
-        if x['user'] == user:
-            DS.delete(x.key)
-            break
+    try:
+        q = DS.query(kind='Sessions', ancestor=DS.key('Sessions', sesh))
+        for x in list(q.fetch()):
+            if x['user'] == user:
+                DS.delete(x.key)
+                break
 
-    # Invalidate cookies with null values and zeroed max_age
-    flash('You have been signed out.')
-    expired = datetime.datetime.now() - datetime.timedelta(hours=1)
-    res = make_response(redirect(url_for('auth.login')))
-    res.set_cookie('user', '', max_age=0, expires=expired, domain='cloud-sec-2019-03.appspot.com', secure=True)
-    res.set_cookie('sesh', '', max_age=0, expires=expired, domain='cloud-sec-2019-03.appspot.com', secure=True)
-    res.set_cookie('app_oidc_nonce', '', max_age=0, expires=expired, domain='cloud-sec-2019-03.appspot.com')
-    res.set_cookie('app_oidc_state', '', max_age=0, expires=expired, domain='cloud-sec-2019-03.appspot.com')
-    return res
+        # Invalidate cookies with null values and zeroed max_age
+        flash('You have been signed out.')
+        expired = datetime.datetime.now() - datetime.timedelta(hours=1)
+        res = make_response(redirect(url_for('auth.login')))
+        res.set_cookie('user', '', max_age=0, expires=expired, domain='cloud-sec-2019-03.appspot.com', secure=True)
+        res.set_cookie('sesh', '', max_age=0, expires=expired, domain='cloud-sec-2019-03.appspot.com', secure=True)
+        res.set_cookie('app_oidc_nonce', '', max_age=0, expires=expired, domain='cloud-sec-2019-03.appspot.com')
+        res.set_cookie('app_oidc_state', '', max_age=0, expires=expired, domain='cloud-sec-2019-03.appspot.com')
+        return res
+    except:
+        flash('Please log in')
+        return redirect(url_for('auth.login'))
 
 """Handles OpenID Connect redirect from Google Authentication.  Create POST
 request to get ID token.  Add user data to datastore and create session."""
