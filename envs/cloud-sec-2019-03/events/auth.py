@@ -76,7 +76,7 @@ def signup():
         user = DS.query(kind='Users', ancestor=q_key)
 
         for ent in list(user.fetch()):
-            if ent['Username']==u_id:
+            if ent['username']==u_id:
                 flash('Username already exists.  Choose a different username.')
                 return redirect(url_for('auth.signup'))
 
