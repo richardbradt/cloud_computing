@@ -1,3 +1,6 @@
+"""Basic Flask app that prints Hello World! as found in most tutorials."""
+"""Does specify host and port 8080 when ran"""
+
 from flask import Flask
 
 app = Flask(__name__)
