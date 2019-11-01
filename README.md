@@ -19,3 +19,7 @@ Lab 4 - Introduction to Docker.
 Lab 5 - Escape a Container.  Write up for basic examples for Docker container escape.
 * Abusing Docker's default root user
 * Abusing cgroup's notify_on_release functionality
+
+Lab 6 - Create a Service Spanning Multiple Containers
+* Initialize a Docker Postgres database container
+* Create a web service that connects to the database and updates path counts
