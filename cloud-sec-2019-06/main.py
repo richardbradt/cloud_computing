@@ -1,10 +1,10 @@
-"""App that produced a path count."""
+"""App that produces a path count."""
 """Default route will increment count for each path and store data in database."""
 
 from flask import Flask, request, render_template
 from os.path import join, dirname
 from dotenv import load_dotenv
-import json, os, psycopg2
+import os, psycopg2
 
 """Import Environment Variables for DB"""
 dotenv_path = join(dirname(__file__), '.env')
@@ -19,8 +19,8 @@ app = Flask(__name__)
 
 """Default route will get path and check for database entry"""
 """If in database, increment count. If not, set count to 1 and add to db"""
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
+@app.route('/', defaults={'path': '/'}, methods=['GET'])
+@app.route('/<path:path>', methods=['GET'])
 def root(path):
     c_path = request.path
     print('CURRENT PATH: {}'.format(c_path))
@@ -28,7 +28,7 @@ def root(path):
     return display_paths()
 
 """Check database for path and count"""
-"""Add connection to Postgresql database"""
+"""Connect to Postgresql database and query current path"""
 def count_path(path):
     sql = """INSERT INTO pathcount (path, count)
                 VALUES (%s, 1)
@@ -36,13 +36,11 @@ def count_path(path):
                 SET count = pathcount.count + 1
              RETURNING count;"""
     conn = None
-    new_count = None
 
     try:
         conn = psycopg2.connect(host=host ,database=db, user=user, password=secret)
         cur = conn.cursor()
         cur.execute(sql, (path,))
-        new_count = cur.fetchone()[0]
         conn.commit()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
@@ -52,7 +50,7 @@ def count_path(path):
             conn.close()
 
 """Display current database contents"""
-"""Add query of Postgresql database"""
+"""Query Postgresql database and build JSON of all pathcounts"""
 def display_paths():
     sql = """SELECT path, count FROM pathcount ORDER BY path"""
     conn = None
